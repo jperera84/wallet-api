@@ -17,6 +17,7 @@ class BlockchainController {
     }
 
     getBlockchainBlocks(){
+        //Implement here
         this.app.get("/api/blocks", (req, res) => {
             this.app.client.getBlockCount().then((count) => {
                 return new Promise((resolve, reject) => {
@@ -27,47 +28,48 @@ class BlockchainController {
                 });
             }).then( async (blockCount) => {
                 let hashes = [];
-                await Promise.all([blockCount, blockCount-1, blockCount-2, blockCount-3, blockCount-4].map(async (blockId) => {
-                    let hash = await this.app.client.getBlockHash(blockId);
+                await Promise.all([blockCount, blockCount - 1, blockCount -2, blockCount -3, blockCount-4].map( async (blockid) => {
+                    let hash = await this.app.client.getBlockHash(blockid);
                     hashes.push(hash);
                 }));
                 return new Promise((resolve, reject) => {
                     resolve(hashes);
                 });
-            }).then(async (resHashes) => {
+            }).then( async (resHashes) => {
                 let blocks = [];
-                await Promise.all(resHashes.map(async (hash) => {
+                await Promise.all(resHashes.map( async (hash) => {
                     let block = await this.app.client.getBlock(hash);
-                    blocks.push(block);
+                    blocks.push(block); 
                 }));
                 return new Promise((resolve, reject) => {
                     resolve(blocks);
-                });
+                })
             }).then((blocks) => {
                 return res.status(200).json(blocks);
-            }).catch((error) => { res.status(500).send(error); })
+            }).catch((error) => { res.status(500).send(error);})
         });
     }
 
     getTransactionInfo() {
-        this.app.get("/api/transactioninfo", (req, res) => { 
+        // Implement here
+        this.app.get("/api/transactioninfo", (req, res) => {
             let txHash = req.query.tx;
             this.app.client.getRawTransaction(txHash).then((rawTransaction) => {
                 return new Promise((resolve, reject) => {
                     if(rawTransaction){
                         resolve(rawTransaction);
                     }
-                    reject("Error Raw transaction");
+                    reject("I couldn't get the raw transaction");
                 });
             }).then((rawT) => {
                 return this.app.client.decodeRawTransaction(rawT);
-            }).then((decodedtransaction) => {
-                if(decodedtransaction){
-                    return res.status(200).json(decodedtransaction);
+            }).then((decodedTransaction) => {
+                if(decodedTransaction){
+                    return res.status(200).json(decodedTransaction);
                 } else {
-                    res.status(500).send("An error decoding");
+                    return res.status(500).send("An error happen decoding the raw transaction");
                 }
-            }).catch((error) => { res.status(500).send(error); })
+            }).catch((error) => {res.status(500).send(error);})
         });
     }
 
